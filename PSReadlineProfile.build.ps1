@@ -4,11 +4,11 @@ $Script:SourceRoot = "$BuildRoot\source"
 $Script:OutputRoot = "$BuildRoot\_output"
 $Script:TestResultsRoot = "$BuildRoot\_testresults"
 $Script:TestsRoot = "$BuildRoot\tests"
-$Script:FileHashRoot = "$BuildRoot\_filehash"
 $Script:SourceScript = "$SourceRoot\$ScriptFileName"
 $Script:DestinationScript = "$OutputRoot\$ScriptFileName"
+$Script:ScriptConfig = [xml]$(Get-Content -Path '.\Script.Config.xml')
 
-Task . Clean, Build, Test, Hash, Deploy
+Task . Clean, Build, Test, Deploy
 Task Testing Clean, Build, Test
 
 # Synopsis: Empty the _output and _testresults folders
@@ -28,7 +28,18 @@ Task Clean {
 # Synopsis: Compile and build the project
 Task Build {
     Write-Host "Building Powershell Script $ScriptName"
-    Get-Content -Path "$SourceScript" | Add-Content -Path $DestinationScript
+    $Version = [version]$($ScriptConfig.config.info.scriptversion)
+    $MajorVersion = $($Version.Major)
+    $MinorVersion = $($Version.Minor)
+    $NewVersion = "{0}.{1}.{2}" -f $MajorVersion,$MinorVersion,$($Version.Build + 1)
+    $ScriptConfig.config.info.scriptversion = $NewVersion
+    $ScriptConfig.Save('Script.Config.xml')
+
+    "# Project:     $ScriptName" | Add-Content -Path $DestinationScript
+    "# Author:      $($ScriptConfig.config.info.author)" | Add-Content -Path $DestinationScript
+    "# Version:     $NewVersion" | Add-Content -Path $DestinationScript
+    "# Description: $($ScriptConfig.config.info.description)" | Add-Content -Path $DestinationScript
+    Get-Content -Path $SourceScript | Add-Content -Path $DestinationScript
 }
 
 # Synopsis: Test the Project
@@ -43,15 +54,7 @@ Task Test {
     Else {Write-Host "All tests have passed...Build can continue."}
 }
 
-# Synopsis: Produce File Hash for all output files
-Task Hash {
-    $HashOutput = Get-FileHash -Path $DestinationScript
-    $HashExportFile = "ScriptFile_Hash_$ScriptName.xml"
-    $HashOutput | Export-Clixml -Path "$FileHashRoot\$HashExportFile"
-    Write-Host "Hash Information File: $HashExportFile"
-}
-
 # Synopsis: Publish to repository
 Task Deploy {
-    Invoke-PSDeploy -Force -Verbose
+    Invoke-PSDeploy -Force
 }
