@@ -28,16 +28,14 @@ Task Clean {
 # Synopsis: Compile and build the project
 Task Build {
     Write-Host "Building Powershell Script $ScriptName"
-    $Version = [version]$($ScriptConfig.config.info.scriptversion)
-    $MajorVersion = $($Version.Major)
-    $MinorVersion = $($Version.Minor)
-    $NewVersion = "{0}.{1}.{2}" -f $MajorVersion,$MinorVersion,$($Version.Build + 1)
-    $ScriptConfig.config.info.scriptversion = $NewVersion
+    [int]$Version = $($ScriptConfig.config.info.scriptbuild)
+    $NewVersion = $($Version+1)
+    $ScriptConfig.config.info.scriptbuild = $NewVersion
     $ScriptConfig.Save('Script.Config.xml')
 
     "# Project:     $ScriptName" | Add-Content -Path $DestinationScript
     "# Author:      $($ScriptConfig.config.info.author)" | Add-Content -Path $DestinationScript
-    "# Version:     $NewVersion" | Add-Content -Path $DestinationScript
+    "# Buildnumber: $NewVersion" | Add-Content -Path $DestinationScript
     "# Description: $($ScriptConfig.config.info.description)" | Add-Content -Path $DestinationScript
     Get-Content -Path $SourceScript | Add-Content -Path $DestinationScript
 }

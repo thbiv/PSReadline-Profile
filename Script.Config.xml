@@ -8,7 +8,7 @@
   </deployment>
   <info>
     <author>Thomas Barratt</author>
-    <scriptversion>1.0.10</scriptversion>
+    <scriptbuild>12</scriptbuild>
     <description>PSReadline Profile Script</description>
   </info>
 </config>
