@@ -1,7 +1,7 @@
 <config>
   <info>
     <author>Thomas Barratt</author>
-    <scriptbuild>13</scriptbuild>
+    <scriptbuild>14</scriptbuild>
     <description>PSReadline Profile Script</description>
   </info>
   <requiredmodules>

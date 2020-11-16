@@ -60,6 +60,11 @@ jobs:
           }
           Invoke-Build
         shell: pwsh
+      
+      - name: Test-Folder-Structure
+        run: |
+          Get-ChildItem -Recurse
+        shell: pwsh
 
       - name: Create-Release
         id: create_release

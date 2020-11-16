@@ -37,7 +37,7 @@ Task Build {
     $Content = Get-Content -Path "$OutputRoot\PSReadline-Profile.ps1"
     $Content | ForEach-Object {$_.TrimEnd()} | Set-Content -Path "$OutputRoot\PSReadline-Profile.ps1" -Force
 
-    $ZipName = "{0}_{1}.zip" -f $ProjectName, $($ScriptConfig.config.info.scriptbuild)
+    $ZipName = "{0}_{1}.zip" -f $ScriptName, $($ScriptConfig.config.info.scriptbuild)
     Compress-Archive -Path "$OutputRoot\PSReadline-Profile.ps1" -DestinationPath "$OutputRoot\$ZipName"
 }
 
