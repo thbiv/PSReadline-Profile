@@ -4,4 +4,9 @@
     <scriptbuild>12</scriptbuild>
     <description>PSReadline Profile Script</description>
   </info>
+  <requiredmodules>
+    <module name="InvokeBuild" />
+    <module name="Pester" requiredversion="4.10.1" />
+    <module name="PSScriptAnalyzer" />
+  </requiredmodules>
 </config>
