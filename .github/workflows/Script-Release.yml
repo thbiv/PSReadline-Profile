@@ -1,0 +1,87 @@
+name: Script-Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Clone-Repository
+        uses: actions/checkout@v2
+
+      - name: Set Environment Variables
+        run: |
+          [xml]$ScriptConfig = Get-Content Script.Config.xml
+          Write-Output ("ScriptBuildNumber={0}" -f $($ScriptConfig.config.info.scriptbuild)) | Add-Content -Path $env:GITHUB_ENV
+          $Username, $ProjectName = $env:GITHUB_REPOSITORY -split "/"
+          @( 
+            "GH_USERNAME={0}" -f $Username
+            "GH_PROJECTNAME={0}" -f $ProjectName
+          ) | Add-Content -Path $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Install Dependencies
+        run:  |
+          Write-Host "Loading Config File"
+          [xml]$ScriptConfig = Get-Content Script.Config.xml
+          $RequiredModules = $ScriptConfig.config.requiredmodules.module
+          ForEach ($Module in $RequiredModules) {
+            Write-Host "  $($Module.name)"
+            Write-Host "  - Installing..." -NoNewline
+            $Params = @{
+              Name = $($Module.name)
+              Scope = 'CurrentUser'
+              Force = $True
+              ErrorAction = 'STOP'
+            }
+            If ($Null -ne $Module.requiredversion) {$Params += @{RequiredVersion = $($Module.requiredversion)}}
+            Install-Module @Params
+            Write-Host "Done"
+          }
+        shell: pwsh
+
+      - name: Build
+        run: |
+          [xml]$ScriptConfig = Get-Content Script.Config.xml
+          $RequiredModules = $ScriptConfig.config.requiredmodules.module
+          ForEach ($Module in $RequiredModules) {
+            Write-Host "  $($Module.name)"
+            Write-Host "  - Importing..." -NoNewline
+            $Params = @{
+              Name = $($Module.name)
+              ErrorAction = 'STOP'
+            }
+            If ($Null -ne $Module.requiredversion) {$Params += @{RequiredVersion = $($Module.requiredversion)}}
+            Import-Module @Params
+            Write-Host "Done"
+          }
+          Invoke-Build
+        shell: pwsh
+
+      - name: Create-Release
+        id: create_release
+        if: "contains(github.event.head_commit.message, ':release:')"
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.ScriptBuildNumber }}
+          release_name: Build ${{ env.ScriptBuildNumber }}
+          body: Build ${{ env.ScriptBuildNumber }}
+          draft: false
+          prerelease: false
+      
+      - name: Upload-Release-Asset
+        id: upload_release_asset
+        if: "contains(github.event.head_commit.message, ':release:')"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url:  ${{ steps.create_release.outputs.upload_url }}
+          asset_path: _output\${{ env.GH_PROJECTNAME }}_${{ env.ScriptBuildNumber }}.zip
+          asset_name: ${{ env.GH_PROJECTNAME }}_${{ env.ScriptBuildNumber }}.zip
+          asset_content_type: application/zip

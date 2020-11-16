@@ -8,8 +8,7 @@ $Script:SourceScript = "$SourceRoot\$ScriptFileName"
 $Script:DestinationScript = "$OutputRoot\$ScriptFileName"
 $Script:ScriptConfig = [xml]$(Get-Content -Path '.\Script.Config.xml')
 
-Task . Clean, Build, Test, Deploy
-Task Testing Clean, Build, Test
+Task . Clean, Build, Test
 
 # Synopsis: Empty the _output and _testresults folders
 Task Clean {
@@ -28,16 +27,18 @@ Task Clean {
 # Synopsis: Compile and build the project
 Task Build {
     Write-Host "Building Powershell Script $ScriptName"
-    [int]$Version = $($ScriptConfig.config.info.scriptbuild)
-    $NewVersion = $($Version+1)
-    $ScriptConfig.config.info.scriptbuild = $NewVersion
-    $ScriptConfig.Save('Script.Config.xml')
 
     "# Project:     $ScriptName" | Add-Content -Path $DestinationScript
     "# Author:      $($ScriptConfig.config.info.author)" | Add-Content -Path $DestinationScript
     "# Buildnumber: $NewVersion" | Add-Content -Path $DestinationScript
     "# Description: $($ScriptConfig.config.info.description)" | Add-Content -Path $DestinationScript
     Get-Content -Path $SourceScript | Add-Content -Path $DestinationScript
+
+    $Content = Get-Content -Path "$OutputRoot\PSReadlineProfile.ps1"
+    $Content | ForEach-Object {$_.TrimEnd()} | Set-Content -Path "$OutputRoot\PSReadlineProfile.ps1" -Force
+
+    $ZipName = "{0}_{1}.zip" -f $ProjectName, $($ScriptConfig.config.info.scriptbuild)
+    Compress-Archive -Path "$OutputRoot\PSReadlineProfile.ps1" -DestinationPath "$OutputRoot\$ZipName"
 }
 
 # Synopsis: Test the Project
@@ -50,9 +51,4 @@ Task Test {
     $BasicResults = Invoke-Pester @PesterBasic -PassThru
     If ($BasicResults.FailedCount -ne 0) {Throw "One or more Basic Script Tests Failed"}
     Else {Write-Host "All tests have passed...Build can continue."}
-}
-
-# Synopsis: Publish to repository
-Task Deploy {
-    Invoke-PSDeploy -Force
 }

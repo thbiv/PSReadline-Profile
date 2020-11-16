@@ -1,11 +1,4 @@
 <config>
-  <deployment>
-    <destinations>
-      <destination>C:\Users\thbarratt\Documents\WindowsPowerShell\PSReadlineProfile.ps1</destination>
-      <destination>C:\Users\thbarratt\Documents\PowerShell\PSReadlineProfile.ps1</destination>
-    </destinations>
-    <testresults>C:\Users\thbarratt\Documents\TestResults\PSReadlineProfile</testresults>
-  </deployment>
   <info>
     <author>Thomas Barratt</author>
     <scriptbuild>12</scriptbuild>
