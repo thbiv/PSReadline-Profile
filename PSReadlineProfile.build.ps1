@@ -30,7 +30,7 @@ Task Build {
 
     "# Project:     $ScriptName" | Add-Content -Path $DestinationScript
     "# Author:      $($ScriptConfig.config.info.author)" | Add-Content -Path $DestinationScript
-    "# Buildnumber: $NewVersion" | Add-Content -Path $DestinationScript
+    "# Buildnumber: $($ScriptConfig.config.info.scriptbuild)" | Add-Content -Path $DestinationScript
     "# Description: $($ScriptConfig.config.info.description)" | Add-Content -Path $DestinationScript
     Get-Content -Path $SourceScript | Add-Content -Path $DestinationScript
 
