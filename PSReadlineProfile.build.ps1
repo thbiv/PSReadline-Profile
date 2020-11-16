@@ -34,7 +34,7 @@ Task Build {
     "# Description: $($ScriptConfig.config.info.description)" | Add-Content -Path $DestinationScript
     Get-Content -Path $SourceScript | Add-Content -Path $DestinationScript
 
-    $Content = Get-Content -Path "$OutputRoot\PSReadlineProfile.ps1"
+    $Content = Get-Content -Path "$OutputRoot\PSReadline-Profile.ps1"
     $Content | ForEach-Object {$_.TrimEnd()} | Set-Content -Path "$OutputRoot\PSReadlineProfile.ps1" -Force
 
     $ZipName = "{0}_{1}.zip" -f $ProjectName, $($ScriptConfig.config.info.scriptbuild)
