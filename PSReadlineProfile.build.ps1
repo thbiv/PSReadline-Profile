@@ -35,10 +35,10 @@ Task Build {
     Get-Content -Path $SourceScript | Add-Content -Path $DestinationScript
 
     $Content = Get-Content -Path "$OutputRoot\PSReadline-Profile.ps1"
-    $Content | ForEach-Object {$_.TrimEnd()} | Set-Content -Path "$OutputRoot\PSReadlineProfile.ps1" -Force
+    $Content | ForEach-Object {$_.TrimEnd()} | Set-Content -Path "$OutputRoot\PSReadline-Profile.ps1" -Force
 
     $ZipName = "{0}_{1}.zip" -f $ProjectName, $($ScriptConfig.config.info.scriptbuild)
-    Compress-Archive -Path "$OutputRoot\PSReadlineProfile.ps1" -DestinationPath "$OutputRoot\$ZipName"
+    Compress-Archive -Path "$OutputRoot\PSReadline-Profile.ps1" -DestinationPath "$OutputRoot\$ZipName"
 }
 
 # Synopsis: Test the Project
